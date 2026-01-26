@@ -44,8 +44,8 @@
 ### 克隆项目
 
 ```bash
-git clone https://github.com/your-repo/WallpaperBase.git
-cd WallpaperBase
+git clone https://github.com/aozi6666/DeepSky.git
+cd DeepSky
 ```
 
 ### 安装依赖
@@ -189,5 +189,5 @@ WallpaperBase/
 ---
 
 <div align="center">
-Made with ❤️ by DeepSpace-WallPaper Team
+    ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ 
 </div>
