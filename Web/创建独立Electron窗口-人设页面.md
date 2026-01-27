@@ -135,6 +135,7 @@ CREATE_CREATE_CHARACTER_WINDOW = 'create-createcharacter-window',
 - `'create-createcharacter-window'`：通道字符串值（使用小写连字符命名）
 
 **为什么这样命名？**
+
 - 遵循项目现有的命名规范（参考 `CREATE_OFFICIAL_WALLPAPER_WINDOW`）
 - 通道值会被自动合并到 `IPCChannels` 对象中，供全局使用
 
