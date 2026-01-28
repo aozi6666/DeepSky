@@ -86,6 +86,83 @@ const openCreateCharacterWindow = async () => {
 - `result.success`：主进程返回的操作结果
 - `onAddLogMessage()`：将操作结果记录到日志中
 
+#### 1.1.1 `ipcEvent.invoke()` 实现原理
+
+**为什么使用 `ipcEvent.invoke()` 而不是直接使用 Electron 的 `ipcRenderer.invoke()`？**
+
+`ipcEvent` 是项目中对 Electron IPC API 的封装，它的实现原理如下：
+
+**1. 封装层次结构：**
+
+```
+渲染进程代码
+    ↓
+ipcEvent.invoke()  (src/renderer/utils/ipcRender.ts)
+    ↓
+window.electron.ipcRenderer.invoke()  (通过 contextBridge 暴露)
+    ↓
+ipcRenderer.invoke()  (Electron 原生 API)
+    ↓
+主进程 ipcMain.handle()  (接收请求)
+```
+
+**2. 实现文件：**
+
+**文件 1：`src/renderer/utils/ipcRender.ts`**
+```typescript
+const ipcEvent = {
+  ...window.electron.ipcRenderer,    // 展开 IPC 通信方法（包括 invoke）
+  ...window.electron.interWindow,     // 展开跨窗口通信方法
+  getFormOtherWin: window.electron.getFormOtherWin,
+};
+
+export default ipcEvent;
+```
+
+**文件 2：`src/main/preload.ts`**
+```typescript
+const electronHandler = {
+  ipcRenderer: {
+    invoke(channel: Channels, ...args: unknown[]) {
+      return ipcRenderer.invoke(channel, ...args);  // 调用 Electron 原生 API
+    },
+    // ... 其他 IPC 方法
+  },
+  // ... 其他功能
+};
+
+// 通过 contextBridge 安全地暴露到渲染进程
+contextBridge.exposeInMainWorld('electron', electronHandler);
+```
+
+**3. 封装的优势：**
+
+- ✅ **统一接口**：合并了 IPC 通信和跨窗口通信的功能，使用统一的 `ipcEvent` 对象
+- ✅ **类型安全**：通过 TypeScript 提供完整的类型定义和自动补全
+- ✅ **安全性**：遵循 Electron 安全最佳实践，通过 `contextBridge` 而不是直接暴露 `ipcRenderer`
+- ✅ **代码简洁**：在渲染进程中只需导入 `ipcEvent`，无需关心底层实现细节
+- ✅ **易于维护**：如果需要修改 IPC 调用逻辑，只需修改封装层，无需改动业务代码
+
+**4. 实际调用流程：**
+
+```typescript
+// 在渲染进程中
+await ipcEvent.invoke(IPCChannels.CREATE_CREATE_CHARACTER_WINDOW)
+    ↓
+// ipcRender.ts 中
+window.electron.ipcRenderer.invoke(channel, ...args)
+    ↓
+// preload.ts 中（通过 contextBridge）
+ipcRenderer.invoke(channel, ...args)
+    ↓
+// Electron 内部 IPC 通信
+    ↓
+// 主进程中
+ipcMain.handle(IPCChannels.CREATE_CREATE_CHARACTER_WINDOW, async () => {...})
+```
+
+**总结：** `ipcEvent.invoke()` 本质上是对 Electron 原生 `ipcRenderer.invoke()` 的封装，通过 `preload.ts` 中的 `contextBridge` 安全地暴露 IPC 功能，并在 `ipcRender.ts` 中统一封装，提供了更好的开发体验和类型安全。
+
 #### 1.2 添加按钮 UI
 
 在 JSX 返回部分添加按钮（约第 223-229 行，在"打开下载器窗口"按钮之后）：
@@ -135,7 +212,6 @@ CREATE_CREATE_CHARACTER_WINDOW = 'create-createcharacter-window',
 - `'create-createcharacter-window'`：通道字符串值（使用小写连字符命名）
 
 **为什么这样命名？**
-
 - 遵循项目现有的命名规范（参考 `CREATE_OFFICIAL_WALLPAPER_WINDOW`）
 - 通道值会被自动合并到 `IPCChannels` 对象中，供全局使用
 
@@ -235,11 +311,12 @@ export enum WindowName {
 ```
 
 **代码说明：**
+
 - `WindowName`：窗口名称枚举，用于窗口池管理
 - `CREATE_CHARACTER`：窗口的唯一标识符
 - 窗口池（windowPool）使用这个名称来存储和检索窗口实例
 
-### 操作文件 2：配置 Webpack 多窗口入口
+### 
 **文件路径：** `.erb/configs/webpack.config.common.ts`
 
 ### 具体修改
@@ -352,6 +429,7 @@ export function createCreateCharacterWindow() {
 **代码详细说明：**
 
 1. **窗口存在性检查**
+   
    ```typescript
    const existingWindow = windowPool.get(WindowName.CREATE_CHARACTER);
    if (existingWindow && !existingWindow.isDestroyed()) {
@@ -360,8 +438,9 @@ export function createCreateCharacterWindow() {
    ```
    - 避免重复创建窗口
    - 如果窗口已存在，直接显示并聚焦
-
+   
 2. **窗口尺寸和位置计算**
+   
    ```typescript
    const primaryDisplay = screen.getPrimaryDisplay();
    const { width: screenWidth, height: screenHeight } = primaryDisplay.workArea;
@@ -372,8 +451,9 @@ export function createCreateCharacterWindow() {
    ```
    - 获取主显示器的工作区域尺寸
    - 计算窗口居中位置
-
+   
 3. **BrowserWindow 配置**
+   
    ```typescript
    new BrowserWindow({
      width, height, x, y,  // 尺寸和位置
@@ -386,20 +466,22 @@ export function createCreateCharacterWindow() {
    - `frame: false`：禁用系统默认窗口框架，使用自定义样式
    - `transparent: true`：透明背景，支持圆角等自定义样式
    - `webPreferences`：配置 Web 安全性和 Node.js 集成
-
+   
 4. **加载 HTML 页面**
+   
    ```typescript
    createCharacterWindow.loadURL(resolveHtmlPath('createcharacter.html'));
    ```
    - `resolveHtmlPath()`：解析 HTML 文件路径（开发/生产环境不同）
    - `createcharacter.html`：由 webpack 编译生成的 HTML 文件
-
+   
 5. **窗口池管理**
+   
    ```typescript
    windowPool.add(WindowName.CREATE_CHARACTER, createCharacterWindow);
    ```
    - 将窗口实例添加到窗口池，方便后续管理和检索
-
+   
 6. **开发者工具（开发模式）**
    ```typescript
    if (!app.isPackaged) {
