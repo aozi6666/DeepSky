@@ -4,6 +4,9 @@ import ipcEvent from '../../utils/ipcRender';
 import { CloseIcon, MaximizeIcon, MinimizeIcon } from './icons';
 import { useWindowHeaderStyles } from './styles';
 
+// 定义组件Props接口
+
+
 interface WindowHeaderProps {
   title?: string;
   showTitle?: boolean;
@@ -21,6 +24,8 @@ function WindowHeader({
   onClose,
   className,
 }: WindowHeaderProps) {
+
+  // 状态管理 - 窗口是否最大化
   const { styles } = useWindowHeaderStyles();
   const [isMaximized, setIsMaximized] = useState(false);
 
@@ -28,34 +33,43 @@ function WindowHeader({
   useEffect(() => {
     const checkMaximized = async () => {
       try {
+        // 通过 IPC 询问主进程：窗口是否最大化？
         const maximized = await ipcEvent.invoke(
           IPCChannels.WINDOW_IS_MAXIMIZED,
         );
         setIsMaximized(maximized || false);
       } catch {
-        // 检查窗口最大化状态失败，使用默认值
+        // 检查窗口最大化状态失败，使用默认值 false
       }
     };
 
+    // 组件挂载时检查一次
     checkMaximized();
 
-    // 监听窗口大小变化
+    // 回调：监听窗口大小变化
     const handleResize = () => {
       checkMaximized();
     };
-
+    // 监听器 resize 事件
+    // ❗❗❗用户可能通过其他方式（如双击标题栏）最大化窗口，需要实时更新按钮状态❗❗❗
     window.addEventListener('resize', handleResize);
+
+    // 清理函数：组件卸载时移除监听器
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // 按钮点击处理回调：最小化
   const handleMinimize = () => {
     if (onMinimize) {
+      // 🔑 如果提供了自定义回调，使用自定义回调
       onMinimize();
     } else {
+      // 否则使用默认的 IPC 通信
       ipcEvent.sendMessage(IPCChannels.WINDOW_MINIMIZE);
     }
   };
 
+  // 按钮点击处理回调：最大化/还原
   const handleMaximize = () => {
     if (onMaximize) {
       onMaximize();
