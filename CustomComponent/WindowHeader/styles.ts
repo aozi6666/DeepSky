@@ -1,6 +1,7 @@
 import { createStyles } from 'antd-style';
 
 export const useWindowHeaderStyles = createStyles(() => ({
+  // 主容器样式
   header: {
     display: 'flex',
     alignItems: 'center',
@@ -10,7 +11,7 @@ export const useWindowHeaderStyles = createStyles(() => ({
     position: 'relative',
     zIndex: 1000,
     userSelect: 'none',
-    WebkitAppRegion: 'drag', // 使标题栏可拖拽
+    WebkitAppRegion: 'drag', // 🔑 使标题栏可拖拽
     // boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12)', // 添加轻微阴影
 
     // 确保在所有平台上都有一致的外观
@@ -19,15 +20,17 @@ export const useWindowHeaderStyles = createStyles(() => ({
     },
   },
 
+  // 标题区域样式(可拖拽)
   titleBar: {
     flex: 1,
     display: 'flex',
     alignItems: 'center',
     paddingLeft: '16px',
     height: '100%',
-    WebkitAppRegion: 'drag', // 标题区域可拖拽
+    WebkitAppRegion: 'drag', //🔑 标题区域可拖拽
   },
 
+  // 标题样式
   title: {
     fontSize: '13px',
     fontWeight: 500,
@@ -40,14 +43,16 @@ export const useWindowHeaderStyles = createStyles(() => ({
       fontSize: '12px',
     },
   },
-
+ 
+  // 窗口控制按钮 容器
   windowControls: {
     display: 'flex',
     alignItems: 'center',
     height: '100%',
-    WebkitAppRegion: 'no-drag', // 控制按钮区域不可拖拽
+    WebkitAppRegion: 'no-drag', // 🔑控制按钮区域 不可拖拽
   },
 
+  // 通用按钮样式
   controlButton: {
     display: 'flex',
     alignItems: 'center',
@@ -58,7 +63,7 @@ export const useWindowHeaderStyles = createStyles(() => ({
     color: 'rgba(255, 255, 255, 0.9)',
     cursor: 'pointer',
     transition: 'all 0.1s ease',
-    WebkitAppRegion: 'no-drag',
+    WebkitAppRegion: 'no-drag',  // 🔑 关键：按钮不可拖拽
 
     '&:hover': {
       background: 'rgba(6, 95, 95, 1)', // 使用指定的悬停背景颜色
@@ -97,6 +102,7 @@ export const useWindowHeaderStyles = createStyles(() => ({
     // 继承通用的controlButton样式
   },
 
+  // 关闭按钮特殊样式
   closeButton: {
     '&:hover': {
       background: '#e81123', // Windows标准的红色
