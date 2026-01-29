@@ -354,11 +354,15 @@ IPC（Inter-Process Communication）是进程间通信。在 Electron 中：
 在 `wallpaperbase/src/main/ipcMain/channels/windowChannels.ts` 中定义：
 
 ```typescript
-export enum IPCChannels {
-  WINDOW_MINIMIZE = 'window-minimize',      // 最小化
-  WINDOW_MAXIMIZE = 'window-maximize',      // 最大化
-  WINDOW_CLOSE = 'window-close',            // 关闭
-  WINDOW_IS_MAXIMIZED = 'window-is-maximized', // 查询是否最大化
+export enum WindowChannels {
+  /** 最小化窗口 */
+  WINDOW_MINIMIZE = 'window-minimize',
+  /** 最大化窗口 */
+  WINDOW_MAXIMIZE = 'window-maximize',
+  /** 关闭窗口 */
+  WINDOW_CLOSE = 'window-close',
+  /** 窗口是否已最大化 */
+  WINDOW_IS_MAXIMIZED = 'window-is-maximized',
 }
 ```
 
@@ -367,45 +371,287 @@ export enum IPCChannels {
 在 `wallpaperbase/src/main/ipcMain/handlers/windowHandlers.ts` 中实现：
 
 ```typescript
-// 最小化窗口
-ipcMain.on(IPCChannels.WINDOW_MINIMIZE, (event) => {
-  const window = BrowserWindow.fromWebContents(event.sender);
-  if (window) {
-    window.minimize();
-  }
-});
+import { BrowserWindow, ipcMain } from 'electron';
+import { WindowChannels } from '../channels/windowChannels';
 
-// 最大化/还原窗口
-ipcMain.on(IPCChannels.WINDOW_MAXIMIZE, (event) => {
-  const window = BrowserWindow.fromWebContents(event.sender);
-  if (window) {
-    if (window.isMaximized()) {
-      window.unmaximize(); // 如果已最大化，则还原
-    } else {
-      window.maximize();   // 否则最大化
+export const registerWindowHandlers = () => {
+  // 最小化窗口
+  ipcMain.on(WindowChannels.WINDOW_MINIMIZE, (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (window) {
+      window.minimize();
     }
-  }
-});
+  });
 
-// 关闭窗口
-ipcMain.on(IPCChannels.WINDOW_CLOSE, (event) => {
-  const window = BrowserWindow.fromWebContents(event.sender);
-  if (window) {
-    window.close();
-  }
-});
+  // 最大化/还原窗口
+  ipcMain.on(WindowChannels.WINDOW_MAXIMIZE, (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (window) {
+      if (window.isMaximized()) {
+        window.unmaximize(); // 如果已最大化，则还原
+      } else {
+        window.maximize();   // 否则最大化
+      }
+    }
+  });
 
-// 查询窗口是否最大化
-ipcMain.handle(IPCChannels.WINDOW_IS_MAXIMIZED, (event) => {
-  const window = BrowserWindow.fromWebContents(event.sender);
-  return window ? window.isMaximized() : false;
+  // 关闭窗口
+  ipcMain.on(WindowChannels.WINDOW_CLOSE, (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (window) {
+      window.close();
+    }
+  });
+
+  // 查询窗口是否最大化
+  ipcMain.handle(WindowChannels.WINDOW_IS_MAXIMIZED, (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    return window ? window.isMaximized() : false;
+  });
+};
+```
+
+---
+
+## 📖 主进程处理器详解（小白必看）
+
+### 1. 什么是 `event` 参数？
+
+`event` 是 Electron 提供的**事件对象**，它包含了发送 IPC 消息的相关信息。
+
+**类比理解：**
+- 就像你给朋友发微信，微信系统会记录"谁发的消息"、"什么时候发的"等信息
+- `event` 就是 Electron 记录这些信息的对象
+
+**`event` 对象包含什么？**
+- `event.sender`：发送消息的**渲染进程**（可以理解为"哪个窗口发送的消息"）
+- 其他信息：时间戳、消息内容等
+
+### 2. `BrowserWindow.fromWebContents(event.sender)` 是什么意思？
+
+这是 Electron 提供的**静态方法**，用于根据渲染进程获取对应的窗口对象。
+
+**详细解释：**
+
+```typescript
+const window = BrowserWindow.fromWebContents(event.sender);
+```
+
+**拆解理解：**
+
+1. **`event.sender`**：
+   - 这是发送 IPC 消息的**渲染进程**（WebContents 对象）
+   - 可以理解为"哪个网页/窗口发送的消息"
+
+2. **`BrowserWindow.fromWebContents()`**：
+   - 这是 Electron 的**内置方法**（静态方法）
+   - 作用：根据渲染进程（WebContents）找到对应的**窗口对象**（BrowserWindow）
+   - 返回值：窗口对象，如果找不到则返回 `null`
+
+3. **`const window`**：
+   - 保存找到的窗口对象
+   - 有了这个对象，就可以控制窗口了（最小化、最大化、关闭等）
+
+**类比理解：**
+- 就像通过"身份证号"（event.sender）找到"具体的人"（window）
+- 找到了人，才能对他进行操作（最小化、最大化等）
+
+### 3. `window.minimize()` 是内置方法吗？
+
+**是的！** 这是 Electron 的 `BrowserWindow` 类提供的**内置方法**。
+
+**Electron 提供的窗口控制方法：**
+
+| 方法 | 作用 | 说明 |
+|------|------|------|
+| `window.minimize()` | 最小化窗口 | 将窗口缩小到任务栏 |
+| `window.maximize()` | 最大化窗口 | 将窗口放大到全屏 |
+| `window.unmaximize()` | 还原窗口 | 从最大化状态还原 |
+| `window.close()` | 关闭窗口 | 关闭窗口 |
+| `window.isMaximized()` | 查询是否最大化 | 返回 `true` 或 `false` |
+
+**这些方法都是 Electron 官方提供的，不需要自己实现！**
+
+### 4. 为什么需要 `if (window)` 判断？
+
+**安全检查**，防止程序崩溃。
+
+**可能的情况：**
+- 窗口可能已经被关闭了
+- 窗口可能不存在
+- `fromWebContents()` 可能返回 `null`
+
+**如果不判断：**
+```typescript
+const window = BrowserWindow.fromWebContents(event.sender);
+window.minimize(); // ❌ 如果 window 是 null，程序会崩溃！
+```
+
+**正确的做法：**
+```typescript
+const window = BrowserWindow.fromWebContents(event.sender);
+if (window) {  // ✅ 先检查 window 是否存在
+  window.minimize(); // 安全地调用方法
+}
+```
+
+### 5. `ipcMain.on` vs `ipcMain.handle` 的区别
+
+#### `ipcMain.on` - 用于"发送消息"（不需要返回值）
+
+```typescript
+ipcMain.on(WindowChannels.WINDOW_MINIMIZE, (event) => {
+  // 执行操作，不需要返回结果
+  window.minimize();
 });
 ```
 
-**关键点：**
-- `ipcMain.on`：用于**发送消息**（不需要返回值）
-- `ipcMain.handle`：用于**请求-响应**（需要返回值）
-- `BrowserWindow.fromWebContents(event.sender)`：获取发送消息的窗口对象
+**特点：**
+- 渲染进程发送消息后，**不等待返回值**
+- 主进程执行操作即可
+- 类似于"发通知"，不需要回复
+
+**使用场景：**
+- 最小化窗口（不需要知道结果）
+- 最大化窗口（不需要知道结果）
+- 关闭窗口（不需要知道结果）
+
+#### `ipcMain.handle` - 用于"请求-响应"（需要返回值）
+
+```typescript
+ipcMain.handle(WindowChannels.WINDOW_IS_MAXIMIZED, (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender);
+  return window ? window.isMaximized() : false; // ✅ 返回结果
+});
+```
+
+**特点：**
+- 渲染进程发送请求后，**等待返回值**
+- 主进程必须返回结果
+- 类似于"问问题"，需要回答
+
+**使用场景：**
+- 查询窗口是否最大化（需要返回 true/false）
+- 获取窗口大小（需要返回数据）
+- 获取窗口位置（需要返回数据）
+
+**对比表格：**
+
+| 特性 | `ipcMain.on` | `ipcMain.handle` |
+|------|--------------|-----------------|
+| 是否需要返回值 | ❌ 不需要 | ✅ 需要 |
+| 渲染进程调用方式 | `ipcEvent.sendMessage()` | `ipcEvent.invoke()` |
+| 是否等待响应 | ❌ 不等待 | ✅ 等待 |
+| 使用场景 | 执行操作 | 查询信息 |
+
+### 6. 完整代码流程示例
+
+让我们用一个完整的例子来理解整个流程：
+
+#### 场景：用户点击"最小化"按钮
+
+**步骤 1：渲染进程（WindowHeader 组件）**
+
+```typescript
+// 用户点击最小化按钮
+const handleMinimize = () => {
+  // 发送 IPC 消息到主进程
+  ipcEvent.sendMessage(WindowChannels.WINDOW_MINIMIZE);
+};
+```
+
+**步骤 2：IPC 通信（Electron 内部）**
+
+```
+渲染进程 → IPC 通道 → 主进程
+```
+
+**步骤 3：主进程（windowHandlers.ts）**
+
+```typescript
+// 主进程接收到消息
+ipcMain.on(WindowChannels.WINDOW_MINIMIZE, (event) => {
+  // 1. 通过 event.sender 找到对应的窗口对象
+  const window = BrowserWindow.fromWebContents(event.sender);
+  
+  // 2. 安全检查
+  if (window) {
+    // 3. 调用 Electron 内置方法，最小化窗口
+    window.minimize();
+  }
+});
+```
+
+**步骤 4：窗口实际最小化**
+
+窗口被最小化到任务栏，用户看到窗口消失了。
+
+---
+
+### 7. 常见问题解答
+
+#### Q1: 为什么不能直接在渲染进程调用 `window.minimize()`？
+
+**A:** 因为渲染进程（网页）**没有权限**直接控制窗口。这是 Electron 的安全设计：
+- **渲染进程**：只能显示内容，不能控制系统资源
+- **主进程**：可以控制系统资源（窗口、文件系统等）
+
+**类比：**
+- 就像网页不能直接删除你电脑上的文件一样
+- 必须通过主进程（有权限的进程）来操作
+
+#### Q2: `event.sender` 是什么类型？
+
+**A:** `event.sender` 是 `WebContents` 类型，代表一个渲染进程（网页）。
+
+**理解：**
+- 每个 Electron 窗口都有一个 `WebContents` 对象
+- `WebContents` 负责加载和显示网页内容
+- 通过 `WebContents` 可以找到对应的 `BrowserWindow`（窗口对象）
+
+#### Q3: 如果多个窗口都发送了消息，怎么知道是哪个窗口？
+
+**A:** 通过 `event.sender` 自动识别！
+
+**原理：**
+- 每个窗口的渲染进程都有**唯一的** `WebContents`
+- `event.sender` 就是发送消息的那个窗口的 `WebContents`
+- `BrowserWindow.fromWebContents(event.sender)` 会自动找到对应的窗口
+
+**示例：**
+```typescript
+// 窗口 A 发送消息 → event.sender 是窗口 A 的 WebContents → 找到窗口 A
+// 窗口 B 发送消息 → event.sender 是窗口 B 的 WebContents → 找到窗口 B
+```
+
+---
+
+### 8. 代码总结
+
+**最小化窗口的完整流程：**
+
+```typescript
+// 1. 注册 IPC 处理器
+ipcMain.on(WindowChannels.WINDOW_MINIMIZE, (event) => {
+  // 2. 获取窗口对象
+  const window = BrowserWindow.fromWebContents(event.sender);
+  
+  // 3. 安全检查
+  if (window) {
+    // 4. 调用 Electron 内置方法
+    window.minimize();
+  }
+});
+```
+
+**关键点总结：**
+1. ✅ `event` 是 Electron 提供的事件对象
+2. ✅ `event.sender` 是发送消息的渲染进程
+3. ✅ `BrowserWindow.fromWebContents()` 是 Electron 内置方法，用于获取窗口对象
+4. ✅ `window.minimize()` 是 Electron 内置方法，用于最小化窗口
+5. ✅ `if (window)` 是安全检查，防止程序崩溃
+6. ✅ `ipcMain.on` 用于不需要返回值的操作
+7. ✅ `ipcMain.handle` 用于需要返回值的查询
 
 ---
 
