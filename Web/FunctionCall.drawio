@@ -1,0 +1,13 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.3.0">
+  <diagram name="第 1 页" id="jDmldYtAu9-87XfjKXqB">
+    <mxGraphModel dx="443" dy="1947" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="TMl0onU2lxJydHxI3yxO-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;autosize=1;resizable=0;" value="&lt;h2 class=&quot;md-end-block md-heading md-focus&quot; style=&quot;box-sizing: border-box; white-space-collapse: preserve; break-after: avoid-page; break-inside: avoid; orphans: 4; font-size: 1.75em; margin-top: 1rem; margin-bottom: 1rem; position: relative; line-height: 1.225; cursor: text; border-bottom: 1px solid rgb(238, 238, 238); color: rgb(51, 51, 51); font-family: &amp;quot;Open Sans&amp;quot;, &amp;quot;Clear Sans&amp;quot;, &amp;quot;Helvetica Neue&amp;quot;, Helvetica, Arial, &amp;quot;Segoe UI Emoji&amp;quot;, &amp;quot;SF Pro&amp;quot;, sans-serif; text-align: start;&quot;&gt;&lt;span class=&quot;md-plain md-expand&quot; style=&quot;box-sizing: border-box;&quot;&gt;Function Calling 链路：AI 主动调用工具&lt;/span&gt;&lt;/h2&gt;" vertex="1">
+          <mxGeometry height="70" width="410" x="50" y="-1160" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
