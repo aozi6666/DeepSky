@@ -1,10 +1,15 @@
-# 请求头信息
+# 这是一个 GET 请求示例，用来演示 HTTP 报文的结构
+
+# 请求行：方法 + 路径 + 协议版本
 GET /api/data?x=1 HTTP/1.1
-# 请求体信息
-Host: example.com
-Connection: keep-alive
-Accept: */*
-X_TEST: time.geekbang
-User-Agent: Mozilla/5.0
-Accept-Language: zh-CN,zh,q=0.9
+
+# 请求头：一行一个，格式是 头名: 头值
+Host: example.com              # 告诉服务器你要访问的域名
+Connection: keep-alive         # 连接复用，一般浏览器会默认带
+Accept: */*                    # 接受任意类型的响应
+X-TEST: time.geekbang          # 自定义请求头，通常用来做调试或携带额外信息
+User-Agent: Mozilla/5.0        # 客户端信息（浏览器标识）
+Accept-Language: zh-CN,zh;q=0.9
 Accept-Encoding: gzip, deflate, br
+
+# 注意：GET 请求通常没有请求体，这里就不写 body 了
