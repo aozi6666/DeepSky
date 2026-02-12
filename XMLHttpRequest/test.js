@@ -39,12 +39,12 @@ function GetWebData(URL) {
     };
   
     // 5. 打开请求
-    xhr.open("GET", URL, true);  // 创建一个 Get 请求, 采用异步
+    xhr.open("GET", URL, true);  // 创建一个 Get 请求, 地址：URL, ture：异步
 
     // 6. 配置参数
     xhr.timeout = 3000;  // 设置 xhr 请求的超时时间
     xhr.responseType = "text"; // 设置响应返回的数据格式
-    xhr.setRequestHeader("X_TEST", "time.geekbang");
+    xhr.setRequestHeader("X_TEST", "time.geekbang"); // 设置请求头
   
     // 7. 发送请求
     xhr.send();
