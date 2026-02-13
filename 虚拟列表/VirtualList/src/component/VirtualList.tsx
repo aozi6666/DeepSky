@@ -11,7 +11,7 @@ export type VirtualListItem = {
 };
 
 type VirtualListProps<T extends VirtualListItem> = {
-  listData: T[];
+  listData: T[]; 
   itemSize: number; // 每项固定高度(px)
   height: number; // 容器可视高度(px)
   overscan?: number; // 上下多渲染几条，避免快速滚动白屏
@@ -19,36 +19,34 @@ type VirtualListProps<T extends VirtualListItem> = {
 };
 
 export function VirtualList<T extends VirtualListItem>({
-  listData,
-  itemSize,
-  height,
-  overscan = 2,
-  renderItem,
+  listData,  // 完整数据数组
+  itemSize,  // 每条固定高度(px)
+  height,  // 容器 可视高度(px)
+  overscan = 3,  // 上下多渲染几条（3~5）
+  renderItem,  // 自定义渲染函数（可选）
 }: VirtualListProps<T>) {
+  // 获取 容器 DOM 元素
   const containerRef = useRef<HTMLDivElement | null>(null);
+  // 记录用户滚动 距离 （多少px）
   const [scrollTop, setScrollTop] = useState(0);
 
   // 1) 占位总高度：让滚动条“看起来像完整列表”
-  const containerHeight = listData.length * itemSize;
+  
 
   // 2) 可视区最多能显示多少条
-  const visibleCount = Math.ceil(height / itemSize);
+  
 
   // 3) 根据 scrollTop 算 startIndex / endIndex
-  const startIndex = Math.floor(scrollTop / itemSize);
-  const endIndex = startIndex + visibleCount;
+  
 
-  // 加 overscan，滚动更顺滑（可选但非常推荐）
-  const safeStart = Math.max(0, startIndex - overscan);
-  const safeEnd = Math.min(listData.length, endIndex + overscan);
+  // 加 overscan缓冲区域，滚动更顺滑（可选但非常推荐）
+  
 
   // 4) 需要渲染的数据切片
-  const renderedItems = useMemo(() => {
-    return listData.slice(safeStart, safeEnd);
-  }, [listData, safeStart, safeEnd]);
+  
 
   // 5) 偏移量：让“这段切片”出现在它该出现的位置
-  const offset = safeStart * itemSize;
+  
 
   const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
