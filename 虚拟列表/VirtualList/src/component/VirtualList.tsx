@@ -52,9 +52,10 @@ export function VirtualList<T extends VirtualListItem>({
 
   // 5) 偏移量：让“这段切片”出现在它该出现的位置
   const offset = safeStart * itemSize;
-
+ 
+  // 滚动事件回调
   const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(e.currentTarget.scrollTop);
+    setScrollTop(e.currentTarget.scrollTop); // 用户滚动，更新 scrollTop， react重新渲染
   };
 
   // 如果你希望外部高度变化时也能对齐，可以在这里强制读取一次
