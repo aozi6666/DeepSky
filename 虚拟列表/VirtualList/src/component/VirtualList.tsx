@@ -31,22 +31,27 @@ export function VirtualList<T extends VirtualListItem>({
   const [scrollTop, setScrollTop] = useState(0);
 
   // 1) 占位总高度：让滚动条“看起来像完整列表”
-  
+  const containerHeight = listData.length * itemSize;
 
   // 2) 可视区最多能显示多少条
+  const visibleCount = Math.ceil(height / itemSize);
   
 
   // 3) 根据 scrollTop 算 startIndex / endIndex
-  
+  const startIndex = Math.floor(scrollTop / itemSize);
+  const endIndex = startIndex + visibleCount;
 
   // 加 overscan缓冲区域，滚动更顺滑（可选但非常推荐）
-  
+  const safeStart = Math.max(0, startIndex - overscan);
+  const safeEnd = Math.min(listData.length, endIndex + overscan); 
 
   // 4) 需要渲染的数据切片
-  
+  const renderedItems = useMemo(() => {
+    return listData.slice(safeStart, safeEnd);
+  }, [listData, safeStart, safeEnd]);
 
   // 5) 偏移量：让“这段切片”出现在它该出现的位置
-  
+  const offset = safeStart * itemSize;
 
   const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
