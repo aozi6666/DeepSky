@@ -62,6 +62,8 @@ function run(genFn) {
       throw e
     }
   }
+
+co(foo());
   
   // run(foo) 像 async 函数一样：返回 Promise
   run(foo).then(
