@@ -16,6 +16,8 @@ export default function MainLayout() {
   // 👉 获取“当前页面的路径信息”
   const location = useLocation()
   const isButtonActive = location.pathname === '/button'
+  const isAgentsActive = location.pathname === '/agents' || location.pathname.startsWith('/agents/')
+  const isQueryActive = location.pathname === '/query'
 
   return (
     <div
@@ -71,6 +73,28 @@ export default function MainLayout() {
           >
             Button
           </button>
+
+          <NavLink
+            to="/agents"
+            style={() => ({
+              ...linkBaseStyle,
+              background: isAgentsActive ? 'var(--accent-bg)' : 'transparent',
+              outline: isAgentsActive ? `1px solid var(--accent-border)` : '1px solid transparent',
+            })}
+          >
+            Agents（:id）
+          </NavLink>
+
+          <NavLink
+            to="/query"
+            style={() => ({
+              ...linkBaseStyle,
+              background: isQueryActive ? 'var(--accent-bg)' : 'transparent',
+              outline: isQueryActive ? `1px solid var(--accent-border)` : '1px solid transparent',
+            })}
+          >
+            Query（?tab=）
+          </NavLink>
         </nav>
       </aside>
 
