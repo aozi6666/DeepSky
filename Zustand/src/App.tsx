@@ -1,11 +1,16 @@
-import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
 
+// 使用 store
+import useCounterStore from './store/useConterStore'
+
 function App() {
-  const [count, setCount] = useState(0)
+  // 使用“逐个 selector”避免每次返回新对象导致的重复订阅/更新。
+  const count = useCounterStore((state) => state.count);
+  const increment = useCounterStore((state) => state.increment);
+  const decrement = useCounterStore((state) => state.decrement);
 
   return (
     <>
@@ -15,21 +20,14 @@ function App() {
           <img src={reactLogo} className="framework" alt="React logo" />
           <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+        <hr />
+        {/* 组件中使用 Zustand 状态管理 */}
+        <h2>Zustand 状态管理中的 count 值为：{count}</h2>
+        <button onClick={increment}>+1</button>
+        <button onClick={decrement}>-1</button>
+        <hr />
       </section>
 
-      <div className="ticks"></div>
 
       <section id="next-steps">
         <div id="docs">
@@ -111,11 +109,8 @@ function App() {
           </ul>
         </div>
       </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
