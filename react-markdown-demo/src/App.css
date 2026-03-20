@@ -182,3 +182,136 @@
     border-right-color: var(--border);
   }
 }
+
+/* ---------------- ReactMarkdown Compact Styles ---------------- */
+.markdown-demo-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 12px 16px 16px;
+  text-align: left; /* root (#root) is center-aligned by template */
+}
+
+.markdown-demo-page h1 {
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 6px 0 10px;
+  letter-spacing: -0.6px;
+}
+
+.markdown-demo-page h2 {
+  font-size: 16.5px;
+  line-height: 1.25;
+  margin: 14px 0 8px;
+  letter-spacing: -0.2px;
+}
+
+.markdown-demo-page p {
+  margin: 6px 0;
+}
+
+.markdown-demo-page ul,
+.markdown-demo-page ol {
+  margin: 6px 0 10px;
+  padding-left: 18px;
+}
+
+.markdown-demo-page li {
+  margin: 0;
+  padding: 0;
+}
+
+.markdown-demo-page table {
+  border-collapse: collapse;
+  width: auto;
+  max-width: 100%;
+  margin: 10px 0 12px;
+  font-size: 14px;
+}
+
+.markdown-demo-page th,
+.markdown-demo-page td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  vertical-align: top;
+}
+
+.markdown-demo-page th {
+  font-weight: 650;
+  background: var(--code-bg);
+}
+
+.markdown-demo-page .md-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  word-break: break-word;
+}
+
+.markdown-demo-page .md-inline-code {
+  font-family: var(--mono);
+  display: inline-flex;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--code-bg);
+  font-size: 0.95em;
+}
+
+.markdown-demo-page .md-pre {
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  background: var(--code-bg);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+/* 覆盖全局 code 规则，避免 pre 内部 code 再额外 padding/背景 */
+.markdown-demo-page .md-pre-code {
+  display: block !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.markdown-demo-page pre code {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Code style mode switch */
+.code-mode-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 0 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.code-mode-label {
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.code-mode-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.code-mode-btn {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.code-mode-btn--active {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}

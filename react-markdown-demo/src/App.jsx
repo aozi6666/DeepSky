@@ -1,8 +1,23 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import "./App.css";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+
 export default function App() {
+  const [codeMode, setCodeMode] = useState("original");
+
+  const codeModes = useMemo(
+    () => [
+      { id: "original", label: "原始样式" },
+      { id: "syntax-dark", label: "SyntaxHighlighter(One Dark)" },
+      { id: "syntax-light", label: "SyntaxHighlighter(One Light)" },
+    ],
+    [],
+  );
+
   const markdown = `
 # react-markdown Demo
 
@@ -34,21 +49,34 @@ function add(a, b) {
 `;
 
   return (
-    <div style={{ padding: 20 }}>
+    <div className="markdown-demo-page">
+      <div className="code-mode-bar">
+        <div className="code-mode-label">代码样式：</div>
+        <div className="code-mode-buttons">
+          {codeModes.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              className={[
+                "code-mode-btn",
+                m.id === codeMode ? "code-mode-btn--active" : "",
+              ].join(" ")}
+              onClick={() => setCodeMode(m.id)}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          // ✅ 自定义 code 渲染
+          // 为了紧凑排版：把样式交给 CSS（尽量少用内联 style）
           code({ inline, className, children, ...props }) {
             if (inline) {
               return (
                 <code
-                  style={{
-                    background: "#f5f5f5",
-                    padding: "2px 4px",
-                    borderRadius: "4px",
-                    fontSize: "0.9em",
-                  }}
+                  className={["md-inline-code", className].filter(Boolean).join(" ")}
                   {...props}
                 >
                   {children}
@@ -56,34 +84,50 @@ function add(a, b) {
               );
             }
 
+            const codeText = Array.isArray(children) ? children.join("") : String(children);
+            const match = /language-(\w+)/.exec(className || "");
+            const language = match?.[1] ?? undefined;
+
+            if (codeMode === "original") {
+              return (
+                <pre className="md-pre">
+                  <code
+                    className={["md-pre-code", className].filter(Boolean).join(" ")}
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                </pre>
+              );
+            }
+
+            const style = codeMode === "syntax-dark" ? oneDark : oneLight;
             return (
-              <pre
-                style={{
-                  background: "#f5f5f5",
-                  padding: "10px",
-                  overflowX: "auto",
-                  borderRadius: "6px",
+              <SyntaxHighlighter
+                language={language}
+                style={style}
+                wrapLongLines={true}
+                customStyle={{
+                  margin: 10,
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  background: undefined, // 让主题自己决定背景色
                 }}
               >
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              </pre>
+                {codeText.replace(/\n$/, "")}
+              </SyntaxHighlighter>
             );
           },
 
-          // ✅ 自定义 a 标签
           a({ href, children, ...props }) {
+            const { className, ...rest } = props;
             return (
               <a
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  color: "#0366d6",
-                  wordBreak: "break-all",
-                }}
-                {...props}
+                className={["md-link", className].filter(Boolean).join(" ")}
+                {...rest}
               >
                 {children}
               </a>
